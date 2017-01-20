@@ -61,6 +61,17 @@ Creation of Database is lazy which means database is actually created only when 
 switched to db video
 ```
 ******************************************************************************************************************************
+### Week 2 - Homework 2.2
 
+```javascript
+> db.grades.find({score: {$gte: 65}}).sort({score: 1});
+{ "_id" : ObjectId("50906d7fa3c412bb040eb5cf"), "student_id" : 22, "type" : "exam", "score" : 65.02518811936324 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb70a"), "student_id" : 100, "type" : "homework", "score" : 65.29214756759019 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb676"), "student_id" : 63, "type" : "homework", "score" : 65.31038121884853 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb77a"), "student_id" : 128, "type" : "homework", "score" : 65.47002803265133 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb743"), "student_id" : 115, "type" : "exam", "score" : 65.47329199925679 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb80c"), "student_id" : 165, "type" : "quiz", "score" : 65.54110645268801 }
+{ "_id" : ObjectId("50906d7fa3c412bb040eb695"), "student_id" : 71, "type" : "homework", "score" : 65.54625488975057 }
+```
 
 
