@@ -62,6 +62,12 @@ switched to db video
 ```
 ******************************************************************************************************************************
 ### Week 2 - Homework 2.2
+Import json file into database.
+```
+> mongoimport --drop -d students -c grades grades.json
+```
+
+#### Answer
 
 ```javascript
 > db.grades.find({score: {$gte: 65}}).sort({score: 1});
@@ -73,5 +79,3 @@ switched to db video
 { "_id" : ObjectId("50906d7fa3c412bb040eb80c"), "student_id" : 165, "type" : "quiz", "score" : 65.54110645268801 }
 { "_id" : ObjectId("50906d7fa3c412bb040eb695"), "student_id" : 71, "type" : "homework", "score" : 65.54625488975057 }
 ```
-
-
