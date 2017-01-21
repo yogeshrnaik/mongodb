@@ -127,3 +127,12 @@ NOTE: There is a dump of the video database included in the handouts for the "Cr
 }
 ```
 ******************************************************************************************************************************
+### Week 2 - Homework 2.6
+Using the video.movieDetails collection, how many movies list "Sweden" second in the the list of countries.
+
+#### Answer:
+```javascript
+> db.movieDetails.find({"countries.1" : "Sweden"}).count();
+6
+```
+******************************************************************************************************************************
