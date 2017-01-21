@@ -80,6 +80,11 @@ Import json file into database.
 { "_id" : ObjectId("50906d7fa3c412bb040eb695"), "student_id" : 71, "type" : "homework", "score" : 65.54625488975057 }
 ```
 ******************************************************************************************************************************
+### Week 2 - Homework 2.4
+
+#### Answer
+Code changes are in UserDAO.java from project https://github.com/yogeshrnaik/mongodb/tree/master/MongoUniversity/M101J/week-02/create_blog_authors
+******************************************************************************************************************************
 ### Week 2 - Homework 2.5
 Find the title of a movie from the year 2013 that is rated PG-13 and won no awards? Please query the video.movieDetails collection to find the answer.
 
