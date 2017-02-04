@@ -438,4 +438,67 @@ t_id_1_class_id_-1", ns: "school.students" }
 2017-02-04T14:17:11.053+0530 I COMMAND  [conn3] command school.$cmd command: createIndexes { createIndexes: "students", indexes: [ { ns: "school.students", key: { student_id: 1.0, class_id: -1.0 }, name: "student_id_1_class_id_-1" } ] } keyUpdates:0 writeConflicts:0 numYields:0 reslen:98 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 12344894 } }, Database: { acquireCount: { W: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 11 } } } protocol:op_command 32641ms
 ```
 
+#### Discovering and deleting indexes
+To see what indexes are present on a collection use following command:
+
+```javascript
+> db.students.getIndexes();
+[{
+	"v": 1,
+	"key": {
+		"_id": 1
+	},
+	"name": "_id_",
+	"ns": "school.students"
+}, {
+	"v": 1,
+	"key": {
+		"student_id": 1
+	},
+	"name": "student_id_1",
+	"ns": "school.students"
+}, {
+	"v": 1,
+	"key": {
+		"student_id": 1,
+		"class_id": -1
+	},
+	"name": "student_id_1_class_id_-1",
+	"ns": "school.students"
+}
+]
+```
+
+There is by default an index on _id and we cannot delete this index.
+The other two indexes are created by us.
+
+If we want to delete an index, use following command.
+
+```javascript
+> db.students.dropIndex({student_id:1, class_id:-1});
+{ "nIndexesWas" : 3, "ok" : 1 }
+
+> db.students.getIndexes();
+[{
+	"v": 1,
+	"key": {
+		"_id": 1
+	},
+	"name": "_id_",
+	"ns": "school.students"
+}, {
+	"v": 1,
+	"key": {
+		"student_id": 1
+	},
+	"name": "student_id_1",
+	"ns": "school.students"
+}
+]
+```
+In Mongo server console, you can see:
+```
+2017-02-04T14:26:56.973+0530 I COMMAND  [conn3] CMD: dropIndexes school.students
+```
+
 ******************************************************************************************************************************
