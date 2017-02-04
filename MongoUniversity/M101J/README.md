@@ -193,6 +193,208 @@ When loading is happening, in Mongo db server console, we see something like bel
 2017-02-04T11:49:30.742+0530 I STORAGE  [FileAllocator] done allocating datafile E:\mongodb\data\school.4, size: 512MB,  took 2.08 secs
 2017-02-04T11:49:30.743+0530 I STORAGE  [conn1] MmapV1ExtentManager took 2 seconds to open: E:\mongodb\data\school.4
 2017-02-04T11:49:30.743+0530 I COMMAND  [conn1] command school.students command: insert { insert: "students", documents: [ { _id: ObjectId('589572702fcfbcd9c874b2b4'), student_id: 245950.0, scores: [ { type: "exam", score: 7.874309508623045 }, { type: "quiz", score: 63.05183584245054 }, { type: "homework", score: 78.03716337089925 }, { type: "homework", score: 65.29313430172454 } ], class_id: 135.0 } ], ordered: true } ninserted:1 keyUpdates:0 writeConflicts:0numYields:0 reslen:25 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 1 } } } protocol:op_command 2083ms
+```
 
+
+#### Explain command to check if a query uses Indexes
+explain() runs on top of collection and then chain what we want to do.
+E.g. To use explain() with find() command, use it like below.
+
+```javascript
+> db.students.explain().find({student_id:1});
+{
+	"queryPlanner": {
+		"plannerVersion": 1,
+		"namespace": "school.students",
+		"indexFilterSet": false,
+		"parsedQuery": {
+			"student_id": {
+				"$eq": 1
+			}
+		},
+		"winningPlan": {
+			"stage": "COLLSCAN",   // COLLSCAN means it is scanning all documents and not using any index
+			"filter": {
+				"student_id": {
+					"$eq": 1
+				}
+			},
+			"direction": "forward"
+		},
+		"rejectedPlans": []
+	},
+	"serverInfo": {
+		"host": "IN1W7L-300705",
+		"port": 27017,
+		"version": "3.2.11",
+		"gitVersion": "009580ad490190ba33d1c6253ebd8d91808923e4"
+	},
+	"ok": 1
+}
+```
+
+If we use findOne() in large collection that does not have any index, it is still faster as it quits as soon as it finds first document.
+Assumption is that documents in students collection are in the order of student_id.
+
+### Add index
+Use createIndex() on a collection to create index. This function takes a JSON that has details of on which fields we want to create index. 
+In below example, we are creating index on student_id field.
+```javascript
+> db.students.createIndex({student_id : 1});
+{
+	"createdCollectionAutomatically" : false,
+    "numIndexesBefore" : 1,
+    "numIndexesAfter" : 2,
+    "ok" : 1
+}
+```
+
+After creating index, if we use explain() now then it shows which index is being used.
+
+```javascript
+> db.students.explain().find({student_id:1});
+{
+	"queryPlanner": {
+		"plannerVersion": 1,
+		"namespace": "school.students",
+		"indexFilterSet": false,
+		"parsedQuery": {
+			"student_id": {
+				"$eq": 1
+			}
+		},
+		"winningPlan": {
+			"stage": "FETCH",
+			"inputStage": {
+				"stage": "IXSCAN",
+				"keyPattern": {
+					"student_id": 1
+				},
+				"indexName": "student_id_1",    // SHOWS HERE WHICH INDEX IS BEING USED
+				"isMultiKey": false,
+				"isUnique": false,
+				"isSparse": false,
+				"isPartial": false,
+				"indexVersion": 1,
+				"direction": "forward",
+				"indexBounds": {
+					"student_id": [
+						"[1.0, 1.0]"
+					]
+				}
+			}
+		},
+		"rejectedPlans": []
+	},
+	"serverInfo": {
+		"host": "IN1W7L-300705",
+		"port": 27017,
+		"version": "3.2.11",
+		"gitVersion": "009580ad490190ba33d1c6253ebd8d91808923e4"
+	},
+	"ok": 1
+}
+```
+
+If we use explain(true) then it actually executes the query and tells us how many documents it examined.
+Check for "executionStages.docsExamined" in below JSON.
+```javascript
+> db.students.explain(true).find({student_id:1});
+{
+	"queryPlanner": {
+		"plannerVersion": 1,
+		"namespace": "school.students",
+		"indexFilterSet": false,
+		"parsedQuery": {
+			"student_id": {
+				"$eq": 1
+			}
+		},
+		"winningPlan": {
+			"stage": "FETCH",
+			"inputStage": {
+				"stage": "IXSCAN",
+				"keyPattern": {
+					"student_id": 1
+				},
+				"indexName": "student_id_1",
+				"isMultiKey": false,
+				"isUnique": false,
+				"isSparse": false,
+				"isPartial": false,
+				"indexVersion": 1,
+				"direction": "forward",
+				"indexBounds": {
+					"student_id": [
+						"[1.0, 1.0]"
+					]
+				}
+			}
+		},
+		"rejectedPlans": []
+	},
+	"executionStats": {
+		"executionSuccess": true,
+		"nReturned": 10,
+		"executionTimeMillis": 0,
+		"totalKeysExamined": 10,
+		"totalDocsExamined": 10,
+		"executionStages": {
+			"stage": "FETCH",
+			"nReturned": 10,
+			"executionTimeMillisEstimate": 0,
+			"works": 11,
+			"advanced": 10,
+			"needTime": 0,
+			"needYield": 0,
+			"saveState": 0,
+			"restoreState": 0,
+			"isEOF": 1,
+			"invalidates": 0,
+			"docsExamined": 10,
+			"alreadyHasObj": 0,
+			"inputStage": {
+				"stage": "IXSCAN",
+				"nReturned": 10,
+				"executionTimeMillisEstimate": 0,
+				"works": 11,
+				"advanced": 10,
+				"needTime": 0,
+				"needYield": 0,
+				"saveState": 0,
+				"restoreState": 0,
+				"isEOF": 1,
+				"invalidates": 0,
+				"keyPattern": {
+					"student_id": 1
+				},
+				"indexName": "student_id_1",
+				"isMultiKey": false,
+				"isUnique": false,
+				"isSparse": false,
+				"isPartial": false,
+				"indexVersion": 1,
+				"direction": "forward",
+				"indexBounds": {
+					"student_id": [
+						"[1.0, 1.0]"
+					]
+				},
+				"keysExamined": 10,
+				"dupsTested": 0,
+				"dupsDropped": 0,
+				"seenInvalidated": 0
+			}
+		},
+		"allPlansExecution": []
+	},
+	"serverInfo": {
+		"host": "IN1W7L-300705",
+		"port": 27017,
+		"version": "3.2.11",
+		"gitVersion": "009580ad490190ba33d1c6253ebd8d91808923e4"
+	},
+	"ok": 1
+}
 ```
 ******************************************************************************************************************************
