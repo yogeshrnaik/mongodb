@@ -501,4 +501,35 @@ In Mongo server console, you can see:
 2017-02-04T14:26:56.973+0530 I COMMAND  [conn3] CMD: dropIndexes school.students
 ```
 
+#### Indexes on Array (Multikey indexes)
+We can create index on array. But, we cannot create a compound index on two arrays.
+
+If we have a compound index on two fields and one of them is an array then index is marked as "isMultiKey" : true
+
+Let us there is a compound index on fields a and b. And let us say the collection has following document already in it.
+```javascript
+> db.foo.find({a:3,b:5});
+{ "_id" : ObjectId("58959b8fa29efaa94adfd821"), "a" : 3, "b" : [ 3, 5, 7 ] }
+```
+Then the index on a and b fields would be marked as isMultiKey: true
+And because of that if we try to insert a new document where both a and b are arrays (see below) then we will get error.
+
+```
+> db.foo.insert({a:[3,4,5], b:[7,8,9]});
+WriteResult({
+    "nInserted" : 0,
+    "writeError" : {
+            "code" : 10088,
+            "errmsg" : "cannot index parallel arrays [b] [a]"
+    }
+})
+```
+But, it is perfectly fine to have one of the fields (either a or b) as array but both cannot be arrays if there is a compound index on both a and b.
+
+```javascript
+> db.foo.find();
+{ "_id" : ObjectId("58959b03a29efaa94adfd820"), "a" : 1, "b" : 2 }
+{ "_id" : ObjectId("58959b8fa29efaa94adfd821"), "a" : 3, "b" : [ 3, 5, 7 ] }
+{ "_id" : ObjectId("58959c08a29efaa94adfd823"), "a" : [ 3, 4, 5 ], "b" : 8 }
+```
 ******************************************************************************************************************************
