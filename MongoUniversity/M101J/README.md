@@ -195,7 +195,6 @@ When loading is happening, in Mongo db server console, we see something like bel
 2017-02-04T11:49:30.743+0530 I COMMAND  [conn1] command school.students command: insert { insert: "students", documents: [ { _id: ObjectId('589572702fcfbcd9c874b2b4'), student_id: 245950.0, scores: [ { type: "exam", score: 7.874309508623045 }, { type: "quiz", score: 63.05183584245054 }, { type: "homework", score: 78.03716337089925 }, { type: "homework", score: 65.29313430172454 } ], class_id: 135.0 } ], ordered: true } ninserted:1 keyUpdates:0 writeConflicts:0numYields:0 reslen:25 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 1 } } } protocol:op_command 2083ms
 ```
 
-
 #### Explain command to check if a query uses Indexes
 explain() runs on top of collection and then chain what we want to do.
 E.g. To use explain() with find() command, use it like below.
@@ -238,7 +237,8 @@ Assumption is that documents in students collection are in the order of student_
 
 ### Add index
 Use createIndex() on a collection to create index. This function takes a JSON that has details of on which fields we want to create index. 
-In below example, we are creating index on student_id field.
+In below example, we are creating index on student_id field. 
+In this 1 after student_id means we are creating index for ascending. -1 means descending.
 ```javascript
 > db.students.createIndex({student_id : 1});
 {
@@ -247,6 +247,19 @@ In below example, we are creating index on student_id field.
     "numIndexesAfter" : 2,
     "ok" : 1
 }
+```
+In Mongo server console, after creating index, it shows:
+```
+2017-02-04T13:52:38.287+0530 I INDEX    [conn3] build index on: school.students properties: { v: 1, key: { student_id: 1.0 }, name: "student_id_1", ns: "school.students" }
+2017-02-04T13:52:38.288+0530 I INDEX    [conn3]          building index using bulk method
+2017-02-04T13:52:41.000+0530 I -        [conn3]   Index Build: 1218800/6172445 19%
+2017-02-04T13:52:44.000+0530 I -        [conn3]   Index Build: 2610800/6172445 42%
+2017-02-04T13:52:49.771+0530 I -        [conn3]   Index Build: 3382600/6172445 54%
+2017-02-04T13:52:52.000+0530 I -        [conn3]   Index Build: 4315800/6172445 69%
+2017-02-04T13:52:55.000+0530 I -        [conn3]   Index Build: 5707000/6172445 92%
+2017-02-04T13:53:08.376+0530 I INDEX    [conn3]          done building bottom layer, going to commit
+2017-02-04T13:53:08.594+0530 I INDEX    [conn3] build index done.  scanned 6172445 total records. 30 secs
+2017-02-04T13:53:08.595+0530 I COMMAND  [conn3] command school.$cmd command: createIndexes { createIndexes: "students", indexes: [ { ns: "school.students", key: { student_id: 1.0 }, name: "student_id_1" } ] } keyUpdates:0 writeConflicts:0 numYields:0 reslen:98 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 12344894 } }, Database: { acquireCount: { W: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount:{ W: 10 } } } protocol:op_command 30383ms
 ```
 
 After creating index, if we use explain() now then it shows which index is being used.
@@ -397,4 +410,32 @@ Check for "executionStages.docsExamined" in below JSON.
 	"ok": 1
 }
 ```
+
+To create compound index, use following command:
+```javascript
+> db.students.createIndex({student_id: 1, class_id: -1});
+{
+	"createdCollectionAutomatically" : false,
+	"numIndexesBefore" : 2,
+	"numIndexesAfter" : 3,
+	"ok" : 1
+}
+```
+
+In Mongo server console, we see:
+```
+2017-02-04T14:16:38.415+0530 I INDEX    [conn3] build index on: school.students properties: { v: 1, key: { student_id: 1.0, class_id: -1.0 }, name: "studen
+t_id_1_class_id_-1", ns: "school.students" }
+2017-02-04T14:16:38.415+0530 I INDEX    [conn3]          building index using bulk method
+2017-02-04T14:16:41.000+0530 I -        [conn3]   Index Build: 1115200/6172445 18%
+2017-02-04T14:16:44.000+0530 I -        [conn3]   Index Build: 2416900/6172445 39%
+2017-02-04T14:16:47.807+0530 I -        [conn3]   Index Build: 2557600/6172445 41%
+2017-02-04T14:16:50.000+0530 I -        [conn3]   Index Build: 3549800/6172445 57%
+2017-02-04T14:16:53.000+0530 I -        [conn3]   Index Build: 4870100/6172445 78%
+2017-02-04T14:16:57.451+0530 I -        [conn3]   Index Build: 5115100/6172445 82%
+2017-02-04T14:17:10.927+0530 I INDEX    [conn3]          done building bottom layer, going to commit
+2017-02-04T14:17:11.050+0530 I INDEX    [conn3] build index done.  scanned 6172445 total records. 32 secs
+2017-02-04T14:17:11.053+0530 I COMMAND  [conn3] command school.$cmd command: createIndexes { createIndexes: "students", indexes: [ { ns: "school.students", key: { student_id: 1.0, class_id: -1.0 }, name: "student_id_1_class_id_-1" } ] } keyUpdates:0 writeConflicts:0 numYields:0 reslen:98 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 12344894 } }, Database: { acquireCount: { W: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 11 } } } protocol:op_command 32641ms
+```
+
 ******************************************************************************************************************************
