@@ -173,6 +173,7 @@ Then use following command in mongo shell to load this file and execute the code
 ```
 mongoshell> load('create_scores2.js');
 ```
+This will take a lot of time (> 30 mins) depending on the hardware configuration of the machine.
 
 When loading is happening, in Mongo db server console, we see something like below:
 ```
@@ -184,5 +185,14 @@ When loading is happening, in Mongo db server console, we see something like bel
 2017-02-04T11:35:23.887+0530 I STORAGE  [FileAllocator] allocating new datafile E:\mongodb\data\school.2, filling with zeroes...
 2017-02-04T11:35:24.917+0530 I STORAGE  [FileAllocator] done allocating datafile E:\mongodb\data\school.2, size: 256MB,  took 1.028 secs
 2017-02-04T11:35:24.918+0530 I COMMAND  [conn1] command school.students command: insert { insert: "students", documents: [ { _id: ObjectId('58956f232fcfbcd9c8568e59'), student_id: 48411.0, scores: [ { type: "exam", score: 19.55097253168092 }, { type: "quiz", score: 63.89583186808366 }, { type: "homework", score: 83.50886772617812 }, { type: "homework", score: 12.00642268082501 } ], class_id: 439.0 } ], ordered: true } ninserted:1 keyUpdates:0 writeConflicts:0 numYields:0 reslen:25 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 1 } } } protocol:op_command 1030ms
+2017-02-04T11:41:24.591+0530 I STORAGE  [FileAllocator] allocating new datafile E:\mongodb\data\school.3, filling with zeroes...
+2017-02-04T11:41:26.829+0530 I STORAGE  [FileAllocator] done allocating datafile E:\mongodb\data\school.3, size: 512MB,  took 2.237 secs
+2017-02-04T11:41:26.829+0530 I STORAGE  [conn1] MmapV1ExtentManager took 2 seconds to open: E:\mongodb\data\school.3
+2017-02-04T11:41:26.830+0530 I COMMAND  [conn1] command school.students command: insert { insert: "students", documents: [ { _id: ObjectId('5895708c2fcfbcd9c86330a6'), student_id: 131209.0, scores: [ { type: "exam", score: 81.4390071413487 }, { type: "quiz", score: 34.43411702085631 }, { type: "homework", score: 60.91781410491238 }, { type: "homework", score: 7.865856439801144 } ], class_id: 296.0 } ], ordered: true } ninserted:1 keyUpdates:0 writeConflicts:0 numYields:0 reslen:25 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 1 } } } protocol:op_command 2239ms
+2017-02-04T11:49:28.660+0530 I STORAGE  [FileAllocator] allocating new datafile E:\mongodb\data\school.4, filling with zeroes...
+2017-02-04T11:49:30.742+0530 I STORAGE  [FileAllocator] done allocating datafile E:\mongodb\data\school.4, size: 512MB,  took 2.08 secs
+2017-02-04T11:49:30.743+0530 I STORAGE  [conn1] MmapV1ExtentManager took 2 seconds to open: E:\mongodb\data\school.4
+2017-02-04T11:49:30.743+0530 I COMMAND  [conn1] command school.students command: insert { insert: "students", documents: [ { _id: ObjectId('589572702fcfbcd9c874b2b4'), student_id: 245950.0, scores: [ { type: "exam", score: 7.874309508623045 }, { type: "quiz", score: 63.05183584245054 }, { type: "homework", score: 78.03716337089925 }, { type: "homework", score: 65.29313430172454 } ], class_id: 135.0 } ], ordered: true } ninserted:1 keyUpdates:0 writeConflicts:0numYields:0 reslen:25 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 1 } } } protocol:op_command 2083ms
+
 ```
 ******************************************************************************************************************************
