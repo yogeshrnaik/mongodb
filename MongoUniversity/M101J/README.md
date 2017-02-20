@@ -533,3 +533,141 @@ But, it is perfectly fine to have one of the fields (either a or b) as array but
 { "_id" : ObjectId("58959c08a29efaa94adfd823"), "a" : [ 3, 4, 5 ], "b" : 8 }
 ```
 ******************************************************************************************************************************
+### Week 5 - Aggregation framework
+
+```
+db.zips.aggregate([{"$group":{"_id":"$state", "population":{$sum:"$pop"}}}])
+```
+
+```
+db.zips.aggregate([{"$group":{"_id":"$state", "average_pop":{$avg:"$pop"}}}])
+```
+
+```
+db.zips.aggregate([{$group:{_id: "$city", postal_codes:{$addToSet:"$_id"}}}])
+```
+
+```
+db.zips.aggregate([{$group:{_id: "$state", "pop":{$max:"$pop"}}}])
+```
+
+```
+db.zips.aggregate([{$project:{_id:0,'city': {$toLower:"$city"},'pop': 1,'state': 1,'zip':'$_id'}}])
+```
+
+******************************************************************************************************************************
+### Week 6 - Sharding - Application Engineering
+
+```
+mongod --replSet m101 --logpath 1.log --dbpath E:\data\rs1 --port 27017 --smallfiles --oplogSize 64 --journal --storageEngine=mmapv1
+mongod --replSet m101 --logpath 2.log --dbpath E:\data\rs2 --port 27018 --smallfiles --oplogSize 64 --journal --storageEngine=mmapv1
+mongod --replSet m101 --logpath 3.log --dbpath E:\data\rs3 --port 27019 --smallfiles --oplogSize 64 --journal --storageEngine=mmapv1
+
+
+C:\Users\naiky>mongo --port 27017
+
+2017-02-20T09:19:16.576+0530 I CONTROL  [main] Hotfix KB2731284 or later update is not installed, will zero-out data files
+MongoDB shell version: 3.2.11
+connecting to: 127.0.0.1:27017/test
+Server has startup warnings:
+2017-02-20T09:18:40.477+0530 I CONTROL  [initandlisten]
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] ** WARNING: This 32-bit MongoDB binary is deprecated
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] ** NOTE: This is a 32-bit MongoDB binary running on a 64-bit operating
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] **      system. Switch to a 64-bit build of MongoDB to
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] **      support larger databases.
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten]
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten]
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] ** NOTE: This is a 32 bit MongoDB binary.
+2017-02-20T09:18:40.478+0530 I CONTROL  [initandlisten] **       32 bit builds are limited to less than 2GB of data (or less with --journal).
+2017-02-20T09:18:40.479+0530 I CONTROL  [initandlisten] **       See http://dochub.mongodb.org/core/32bit
+2017-02-20T09:18:40.479+0530 I CONTROL  [initandlisten]
+> config = { _id: "m101", members:[
+...           { _id : 0, host : "localhost:27017"},
+...           { _id : 1, host : "localhost:27018"},
+...           { _id : 2, host : "localhost:27019"} ]
+... };
+{
+        "_id" : "m101",
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "localhost:27017"
+                },
+                {
+                        "_id" : 1,
+                        "host" : "localhost:27018"
+                },
+                {
+                        "_id" : 2,
+                        "host" : "localhost:27019"
+                }
+        ]
+}
+
+> rs.initiate(config);
+{ "ok" : 1 }
+m101:OTHER> rs.status()
+{
+        "set" : "m101",
+        "date" : ISODate("2017-02-20T03:49:40.202Z"),
+        "myState" : 2,
+        "term" : NumberLong(0),
+        "heartbeatIntervalMillis" : NumberLong(2000),
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "localhost:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 61,
+                        "optime" : {
+                                "ts" : Timestamp(1487562573, 1),
+                                "t" : NumberLong(-1)
+                        },
+                        "optimeDate" : ISODate("2017-02-20T03:49:33Z"),
+                        "infoMessage" : "could not find member to sync from",
+                        "configVersion" : 1,
+                        "self" : true
+                },
+                {
+                        "_id" : 1,
+                        "name" : "localhost:27018",
+                        "health" : 1,
+                        "state" : 5,
+                        "stateStr" : "STARTUP2",
+                        "uptime" : 6,
+                        "optime" : {
+                                "ts" : Timestamp(0, 0),
+                                "t" : NumberLong(-1)
+                        },
+                        "optimeDate" : ISODate("1970-01-01T00:00:00Z"),
+                        "lastHeartbeat" : ISODate("2017-02-20T03:49:38.792Z"),
+                        "lastHeartbeatRecv" : ISODate("2017-02-20T03:49:39.136Z"),
+                        "pingMs" : NumberLong(1),
+                        "configVersion" : 1
+                },
+                {
+                        "_id" : 2,
+                        "name" : "localhost:27019",
+                        "health" : 1,
+                        "state" : 5,
+                        "stateStr" : "STARTUP2",
+                        "uptime" : 6,
+                        "optime" : {
+                                "ts" : Timestamp(0, 0),
+                                "t" : NumberLong(-1)
+                        },
+                        "optimeDate" : ISODate("1970-01-01T00:00:00Z"),
+                        "lastHeartbeat" : ISODate("2017-02-20T03:49:38.791Z"),
+                        "lastHeartbeatRecv" : ISODate("2017-02-20T03:49:39.139Z"),
+                        "pingMs" : NumberLong(1),
+                        "configVersion" : 1
+                }
+        ],
+        "ok" : 1
+}
+m101:SECONDARY>
+```
+
+******************************************************************************************************************************
